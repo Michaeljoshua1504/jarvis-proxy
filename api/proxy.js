@@ -26,7 +26,11 @@ export default async function handler(req, res) {
     );
 
     const data = await response.json();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response';
+    console.log('Raw Gemini data:', JSON.stringify(data));
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text 
+           || data?.candidates?.[0]?.output 
+           || data?.text 
+           || 'No response';
     return res.status(200).json({ reply });
 
   } catch (error) {

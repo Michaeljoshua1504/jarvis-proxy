@@ -14,23 +14,29 @@ export default async function handler(req, res) {
   try {
     const { message } = req.body;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: message }] }]
-        })
-      }
-    );
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'llama3-8b-8192',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are Jarvis, a DevOps learning assistant built into a personal learning tracker. Help the user learn DevOps concepts clearly and simply.'
+          },
+          {
+            role: 'user',
+            content: message
+          }
+        ]
+      })
+    });
 
     const data = await response.json();
-    console.log('Raw Gemini data:', JSON.stringify(data));
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text 
-           || data?.candidates?.[0]?.output 
-           || data?.text 
-           || 'No response';
+    const reply = data.choices?.[0]?.message?.content || 'No response';
     return res.status(200).json({ reply });
 
   } catch (error) {
